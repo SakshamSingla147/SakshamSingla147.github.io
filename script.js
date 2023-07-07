@@ -1,199 +1,118 @@
-'use strict';
+var c = document.getElementById('canv');
+var $ = c.getContext('2d');
+var w = c.width = window.innerWidth;
+var h = c.height = window.innerHeight;
+var _w = w * 0.5;
+var _h = h * 0.5;
+var num = 80;
+var hearts = [];
+var u = 0;
+for (var i = 0; i < num; i++) {
+var heart = new Heart(_w + rnd(-w, w),
+    _h + rnd(-h, h), rnd(20, 145), 'heart');
+hearts.push(heart);
+}
+fallen();
 
-
-
-// element toggle function
-const elementToggleFunc = function (elem) { elem.classList.toggle("active"); }
-
-
-
-// sidebar variables
-const sidebar = document.querySelector("[data-sidebar]");
-const sidebarBtn = document.querySelector("[data-sidebar-btn]");
-
-// sidebar toggle functionality for mobile
-sidebarBtn.addEventListener("click", function () { elementToggleFunc(sidebar); });
-
-
-
-// testimonials variables
-const testimonialsItem = document.querySelectorAll("[data-testimonials-item]");
-const modalContainer = document.querySelector("[data-modal-container]");
-const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
-const overlay = document.querySelector("[data-overlay]");
-
-// modal variable
-const modalImg = document.querySelector("[data-modal-img]");
-const modalTitle = document.querySelector("[data-modal-title]");
-const modalText = document.querySelector("[data-modal-text]");
-
-// modal toggle function
-const testimonialsModalFunc = function () {
-  modalContainer.classList.toggle("active");
-  overlay.classList.toggle("active");
+function fallen() {
+u -= .2;
+window.requestAnimationFrame(fallen);
+$.globalCompositeOperation = 'source-over';
+  var g_ = $.createLinearGradient(c.width + c.width, c.height + c.height * 1.5, c.width + c.width, 1);
+g_.addColorStop(0, 'hsla(253, 5%, 95%, 1)');
+g_.addColorStop(0.5, 'hsla(253, 75%, 20%, 1)');
+g_.addColorStop(1, 'hsla(0, 0%, 5%, 1)');
+$.fillStyle = g_;
+$.fillRect(0, 0, c.width, c.height);
+$.globalCompositeOperation = 'difference';
+$.font = "3.5em Sonsie One";
+$.fillStyle = 'hsla(' + u + ',85%,50%,.2)';
+for (var i = 0; i < hearts.length; i++) {
+    hearts[i].move();
+    hearts[i].render($);
+}
 }
 
-// add click event to all modal items
-for (let i = 0; i < testimonialsItem.length; i++) {
-
-  testimonialsItem[i].addEventListener("click", function () {
-
-    modalImg.src = this.querySelector("[data-testimonials-avatar]").src;
-    modalImg.alt = this.querySelector("[data-testimonials-avatar]").alt;
-    modalTitle.innerHTML = this.querySelector("[data-testimonials-title]").innerHTML;
-    modalText.innerHTML = this.querySelector("[data-testimonials-text]").innerHTML;
-
-    testimonialsModalFunc();
-
-  });
-
-}
-
-// add click event to modal close button
-modalCloseBtn.addEventListener("click", testimonialsModalFunc);
-overlay.addEventListener("click", testimonialsModalFunc);
-
-
-
-// custom select variables
-const select = document.querySelector("[data-select]");
-const selectItems = document.querySelectorAll("[data-select-item]");
-const selectValue = document.querySelector("[data-selecct-value]");
-const filterBtn = document.querySelectorAll("[data-filter-btn]");
-
-select.addEventListener("click", function () { elementToggleFunc(this); });
-
-// add event in all select items
-for (let i = 0; i < selectItems.length; i++) {
-  selectItems[i].addEventListener("click", function () {
-
-    let selectedValue = this.innerText.toLowerCase();
-    selectValue.innerText = this.innerText;
-    elementToggleFunc(select);
-    filterFunc(selectedValue);
-
-  });
-}
-
-// filter variables
-const filterItems = document.querySelectorAll("[data-filter-item]");
-
-const filterFunc = function (selectedValue) {
-
-  for (let i = 0; i < filterItems.length; i++) {
-
-    if (selectedValue === "all") {
-      filterItems[i].classList.add("active");
-    } else if (selectedValue === filterItems[i].dataset.category) {
-      filterItems[i].classList.add("active");
-    } else {
-      filterItems[i].classList.remove("active");
+function Heart(x, y, sz, _heart) {
+this.x = x || w;
+this.y = y || h;
+this.dy = sz / 100;
+this.sz = sz || 100;
+this._heart = _heart || 'heart';
+this.hue = Math.random() * 360;
+this.move = function() {
+    this.y += this.dy;
+    if (this.y > h + this.sz) {
+      this.y -= h + this.sz * 2;
     }
-
-  }
-
+};
+this.render = function($) {
+    var g = $.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.sz);
+    g.addColorStop(0, 'hsla(' + this.hue + ',100%,50%,1)');
+    g.addColorStop(1, 'hsla(0,0%,0%,0)');
+    $.beginPath();
+    $.fillStyle = g;
+    $.moveTo(this.x, this.y);
+    this.hue += 0.3;
+    if (this.hue > 359) this.hue = 0;
+    var path;
+    switch (this._heart) {
+    case 'heart':
+        path = [
+        [-0.00417, -0.25796, -0.44345, -0.29936, -0.49702, 0],
+        [-0.54762, 0.30254, -0.08333, 0.5, 0, 0.79618],
+        [0.08333, 0.5, 0.54762, 0.30254, 0.49702, 0],
+        [0.44345, -0.29936, 0.0417, -0.25796, 0, 0]
+        ];
+        break;
+    default:
+        break;
+    }
+    for (var i = 0; i < path.length; i++) {
+      $.bezierCurveTo(path[i][0] * this.sz + this.x, path[i]
+        [1] * this.sz + this.y, path[i]
+        [2] * this.sz + this.x, path[i]
+        [3] * this.sz + this.y, path[i]
+        [4] * this.sz + this.x, path[i]
+        [5] * this.sz + this.y);
+    }
+    $.closePath();
+    $.fill();
+};
 }
 
-    // Get all certificate links
-    const certificateLinks = document.querySelectorAll('.certificate-link');
-
-    // Get the certificate viewer element
-    const certificateViewer = document.getElementById('certificate-viewer');
-
-    // Get the modal and close button elements
-    const modal = document.getElementById('certificate-modal');
-    const closeButton = document.getElementsByClassName('close')[0];
-
-    // Function to open the modal and display the certificate image
-    function openModal(certificateImage) {
-      certificateViewer.innerHTML = `<img src="${certificateImage}" alt="Certificate">`;
-      modal.style.display = 'block';
-    }
-
-    // Function to close the modal
-    function closeModal() {
-      modal.style.display = 'none';
-    }
-
-    // Add click event listener to each certificate link
-    certificateLinks.forEach(link => {
-      link.addEventListener('click', function (event) {
-        event.preventDefault();
-        const certificateImage = this.querySelector('img').src;
-        openModal(certificateImage);
-      });
-    });
-
-    // Add click event listener to the close button
-    closeButton.addEventListener('click', closeModal);
-
-    // Close the modal when clicking outside of it
-    window.addEventListener('click', function (event) {
-      if (event.target === modal) {
-        closeModal();
-      }
-    });
+function rnd(min, max) {
+  return Math.random() * (max - min) + min;
+}
+window.addEventListener('resize', function() {
+c.width = w = window.innerWidth;
+c.height = h = window.innerHeight;
+});
+var love = setInterval(function(){
+    var r_num = Math.floor(Math.random() * 40) + 1;
+      var r_size = Math.floor(Math.random() * 65) + 10;
+      var r_left = Math.floor(Math.random() * 100) + 1;
+      var r_bg = Math.floor(Math.random() * 25) + 100;
+    var r_time = Math.floor(Math.random() * 5) + 5;
+    $('.bg_heart').append("<div class='heart' style='width:"+r_size+"px;height:"+r_size+"px;left:"+r_left+"%;background:rgba(255,"+(r_bg-25)+","+r_bg+",1);-webkit-animation:love "+r_time+"s ease;-moz-animation:love "+r_time+"s ease;-ms-animation:love "+r_time+"s ease;animation:love "+r_time+"s ease'></div>");
     
-// add event in all filter button items for large screen
-let lastClickedBtn = filterBtn[0];
+    $('.bg_heart').append("<div class='heart' style='width:"+(r_size-10)+"px;height:"+(r_size-10)+"px;left:"+(r_left+r_num)+"%;background:rgba(255,"+(r_bg-25)+","+(r_bg+25)+",1);-webkit-animation:love "+(r_time+5)+"s ease;-moz-animation:love "+(r_time+5)+"s ease;-ms-animation:love "+(r_time+5)+"s ease;animation:love "+(r_time+5)+"s ease'></div>");
 
-for (let i = 0; i < filterBtn.length; i++) {
+},500);
 
-  filterBtn[i].addEventListener("click", function () {
-
-    let selectedValue = this.innerText.toLowerCase();
-    selectValue.innerText = this.innerText;
-    filterFunc(selectedValue);
-
-    lastClickedBtn.classList.remove("active");
-    this.classList.add("active");
-    lastClickedBtn = this;
-
-  });
-
-}
-
-
-
-// contact form variables
-const form = document.querySelector("[data-form]");
-const formInputs = document.querySelectorAll("[data-form-input]");
-const formBtn = document.querySelector("[data-form-btn]");
-
-// add event to all form input field
-for (let i = 0; i < formInputs.length; i++) {
-  formInputs[i].addEventListener("input", function () {
-
-    // check form validation
-    if (form.checkValidity()) {
-      formBtn.removeAttribute("disabled");
-    } else {
-      formBtn.setAttribute("disabled", "");
+var i = 0;
+var txt1 = "Hi Mahi👸🏻!  <<               Now I wan't to say something special to you. <<<                So , Please read everything carefully...!                                                                           > When I saw you for the first time < You seems something Special to me.  <<                  As the days goes < you get closer to me....! <<                           I don't know the reason why your thoughts always resonates inside my mind...!                                                     > Everything about you is always intresting for me...!                     << I am somewhat nervous Because I haven't said these words to anyone and I won't say to anyone in future...!                                                 > I Love my Parents so much than anything else in this world....!                    << Now You are the only person  whom I love equally with my parents....!                                     > I want to tell few lines for you !                    <<< Tum se us din milkr hm                   < Kuch is kadar khush hue the                    < Ki muskurahat meri raat                    < Aur hasi meri din hue the                    << Udasi aur mayusi se mulakat hue                     < Ab lamba samay ho gaya hai                     < Shayad jb tum ban than k aayi thi                     < In kaatil nigahon se do katl hue the                                                                              >I Love U <Mahi👸🏻!                   <<<< Give me One chance to Prove my Love ...!";
+var speed = 50;
+typeWriter();
+function typeWriter() {
+if (i < txt1.length) {        
+    if(txt1.charAt(i)=='<')
+        document.getElementById("text1").innerHTML += '</br>';
+    else if(txt1.charAt(i)=='>')
+        document.getElementById("text1").innerHTML = '';
+    else
+        document.getElementById("text1").innerHTML += txt1.charAt(i);
+    i++;
+    setTimeout(typeWriter, speed);
     }
-
-  });
-}
-
-
-
-// page navigation variables
-const navigationLinks = document.querySelectorAll("[data-nav-link]");
-const pages = document.querySelectorAll("[data-page]");
-
-// add event to all nav link
-for (let i = 0; i < navigationLinks.length; i++) {
-  navigationLinks[i].addEventListener("click", function () {
-
-    for (let i = 0; i < pages.length; i++) {
-      if (this.innerHTML.toLowerCase() === pages[i].dataset.page) {
-        pages[i].classList.add("active");
-        navigationLinks[i].classList.add("active");
-        window.scrollTo(0, 0);
-      } else {
-        pages[i].classList.remove("active");
-        navigationLinks[i].classList.remove("active");
-      }
-    }
-
-  });
 }
